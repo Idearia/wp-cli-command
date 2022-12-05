@@ -1,0 +1,7 @@
+nbproject/
+deploy.sh
+version.txt
+/~/
+/.svnignore
+.DS_Store
+vendor/

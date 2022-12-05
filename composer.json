@@ -1,0 +1,20 @@
+{
+    "name": "idearia/wp-cli-command",
+    "description": "Simple class to create WP-CLI commands with validation with little effort.",
+    "keywords": ["wp-cli", "wp", "wordpress", "validation"],
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/Idearia/wp-cli-command",
+    "require": {
+        "php": "^7.0",
+        "phpstan/phpstan": "^1.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Idearia\\WP_CLI\\": "src/"
+        }
+    },
+    "require-dev": {
+        "php-stubs/wp-cli-stubs": "^2.7"
+    }
+}
