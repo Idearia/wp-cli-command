@@ -37,8 +37,11 @@ class SimpleCommand extends Command
     }
 
     /**
-     * Restrict the <name> parameter to be longer than 3
-     * characters
+     * Restrict the <name> parameter to be longer than 3 characters.
+     *
+     * @param string[]             $args
+     * @param array<string,string> $assoc_args
+     * @param array<string,mixed>  $options
      */
     public static function validate(array $args, array $assoc_args, array $options): bool
     {
@@ -47,5 +50,33 @@ class SimpleCommand extends Command
             return false;
         }
         return true;
+    }
+
+    /**
+     * Tell the user what's going on, as soon as WP CLI starts
+     * thinking about executin a command
+     *
+     * @param string[]             $args
+     * @param array<string,string> $assoc_args
+     * @param array<string,mixed>  $options
+     */
+    public static function before_run_command( array $args, array $assoc_args, array $options ): void
+    {
+        WP_CLI::line( "About to run command `wp " . join( " ", $args ) . "`" );
+    }
+    /**
+     * Tell the user what's going on, before the command is invoked
+     */
+    public static function before_invoke(): void
+    {
+        WP_CLI::line( "Invoking command..." );
+    }
+
+    /**
+     * Tell the user what's going on, after the command is invoked
+     */
+    public static function after_invoke(): void
+    {
+        WP_CLI::line( "All done 💪" );
     }
 }
