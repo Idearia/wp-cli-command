@@ -2,6 +2,7 @@
 namespace Idearia\WP_CLI;
 
 use WP_CLI;
+use Idearia\WP_CLI\Utils;
 
 /**
  * Register new WP CLI commands.
@@ -18,6 +19,31 @@ abstract class Command
     protected static string $usage = 'Wrong arguments';
 
     /**
+     * Command handled by this class, set automatically
+     */
+    protected static string $command;
+
+    /**
+     * Short description of the command
+     */
+    protected static string $shortdesc = '';
+
+    /**
+     * Long description of the command
+     */
+    protected static string $longdesc = '';
+
+    /**
+     * Whether to allow the command to run on all sites in a multisite network
+     */
+    protected static bool $allow_all_sites_flag = false;
+
+    /**
+     * Synopsis of the command
+     */
+    protected static array $synopsis = [];
+
+    /**
      * Number of times before_invoke is run
      */
     protected static int $count_before_invoke = 0;
@@ -27,6 +53,36 @@ abstract class Command
      */
     protected static int $count_after_invoke = 0;
 
+    public function __invoke( array $args, array $assoc_args )
+    {
+        if ( ! is_multisite() ) {
+            static::invoke( $args, $assoc_args );
+        } else {
+            static::invoke_multisite( $args, $assoc_args );
+        }
+    }
+
+    /**
+     * Handle the command for multisite installations
+     */
+    public static function invoke_multisite( array $args, array $assoc_args )
+    {
+        $all_sites_flag = Utils::get_flag_value( $assoc_args, 'all-sites' );
+
+        // Throw an error if the --all-sites flag is set but the command does not allow it.
+        if ( $all_sites_flag && ! static::$allow_all_sites_flag ) {
+            WP_CLI::error( 'The --all-sites flag is not allowed for this command.' );
+        }
+        
+        // If the --all-sites flag is set then run the handler on all sites.
+        if ( $all_sites_flag ) {
+            Utils::run_on_all_sites( $args, $assoc_args );
+        } else {
+            // Run the handler on the current site.
+            static::invoke( $args, $assoc_args );
+        }
+    }
+
     /**
      * Register the command with WP-CLI
      *
@@ -34,9 +90,11 @@ abstract class Command
      */
     public static function init( string $command ): void
     {
-        if ( ! static::isCliRunning() ) {
+        if ( ! Utils::is_cli_running() ) {
             return;
         }
+
+        static::$command = $command;
 
         static::register( $command );
     }
@@ -52,8 +110,11 @@ abstract class Command
             static::class,
             [
                 'before_invoke' => [ static::class, '_before_invoke' ],
-                'after_invoke' => [ static::class, '_after_invoke' ]
-            ]
+                'after_invoke' => [ static::class, '_after_invoke' ],
+                'shortdesc' => static::$shortdesc,
+                'synopsis' => static::get_synopsis(),
+                'longdesc' => static::$longdesc,
+            ],
         );
 
         // Allow to do stuff just before the command is executed
@@ -84,14 +145,6 @@ abstract class Command
                 WP_CLI::error( static::$usage );
             }
         );
-    }
-
-    /**
-     * Check if we are running from WP-CLI
-     */
-    protected static function isCliRunning(): bool
-    {
-        return defined( 'WP_CLI' ) && WP_CLI;
     }
 
     /**
@@ -177,4 +230,23 @@ abstract class Command
         static::$count_after_invoke++;
     }
 
+    /**
+     * Get the command synopsis
+     *
+     * @return array[]
+     */
+    public static function get_synopsis(): array
+    {   
+        // If the command allows it, then add the --all-sites flag
+        // at the end of the synopsis array
+        if ( static::$allow_all_sites_flag ) {
+            static::$synopsis[] = [
+                'type'        => 'flag',
+                'name'        => 'all-sites',
+                'description' => 'Run the command on all sites in the network',
+            ];
+        }
+
+        return static::$synopsis;
+    }
 }
