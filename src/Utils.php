@@ -28,17 +28,23 @@ abstract class Utils
      * @param mixed  $default    Default value for the flag. Default: NULL.
      * @return mixed
      */
-    public static function get_flag_value( $assoc_args, $flag, $default = null ) 
+    public static function get_flag_value( array $assoc_args, string $flag, mixed $default = null ) : mixed
     {
         return isset( $assoc_args[ $flag ] ) ? $assoc_args[ $flag ] : $default;
     }
 
     /**
      * Loop through all not deleted sites and run the command on each one.
+     * 
+     * The callback must take two array arguments: $args and $assoc_args.
+     *
+     * @param callable $callback
+     * @param array $args
+     * @param array $assoc_args
      */
-    public static function run_on_all_sites( array $args, array $assoc_args )
+    public static function run_on_all_sites( callable $callback, array $args, array $assoc_args ) : void
     {
-        // Get all active sites
+        // Get all active sites.
         $sites = get_sites( array(
             'deleted'  => 0,
         ) );
@@ -48,8 +54,8 @@ abstract class Utils
             // Switch to the site.
             switch_to_blog( $site->blog_id );
 
-            // Run invoke.
-            self::__invoke( $args, $assoc_args );
+            // Run callback.
+            call_user_func( $callback, $args, $assoc_args );
 
             // Restore the site.
             restore_current_blog();

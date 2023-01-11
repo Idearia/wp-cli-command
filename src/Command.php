@@ -53,6 +53,11 @@ abstract class Command
      */
     protected static int $count_after_invoke = 0;
 
+    /**
+     * All subclasses must have an invoke method that handles the command
+     */
+    abstract protected static function invoke( array $args, array $assoc_args );
+
     public function __invoke( array $args, array $assoc_args )
     {
         if ( ! is_multisite() ) {
@@ -73,10 +78,10 @@ abstract class Command
         if ( $all_sites_flag && ! static::$allow_all_sites_flag ) {
             WP_CLI::error( 'The --all-sites flag is not allowed for this command.' );
         }
-        
+
         // If the --all-sites flag is set then run the handler on all sites.
         if ( $all_sites_flag ) {
-            Utils::run_on_all_sites( $args, $assoc_args );
+            Utils::run_on_all_sites( [ static::class, 'invoke' ], $args, $assoc_args );
         } else {
             // Run the handler on the current site.
             static::invoke( $args, $assoc_args );
@@ -244,6 +249,7 @@ abstract class Command
                 'type'        => 'flag',
                 'name'        => 'all-sites',
                 'description' => 'Run the command on all sites in the network',
+                'optional'    => true,
             ];
         }
 
