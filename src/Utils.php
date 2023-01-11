@@ -28,7 +28,7 @@ abstract class Utils
      * @param mixed  $default    Default value for the flag. Default: NULL.
      * @return mixed
      */
-    public static function get_flag_value( array $assoc_args, string $flag, mixed $default = null ) : mixed
+    public static function get_flag_value( array $assoc_args, string $flag, mixed $default = null )
     {
         return isset( $assoc_args[ $flag ] ) ? $assoc_args[ $flag ] : $default;
     }
