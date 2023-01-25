@@ -6,7 +6,7 @@
     "license": "MIT",
     "homepage": "https://github.com/Idearia/wp-cli-command",
     "require": {
-        "php": "^7.4"
+        "php": "^7.4|^8.0"
     },
     "require-dev": {
         "php-stubs/wp-cli-stubs": "^2.7",
