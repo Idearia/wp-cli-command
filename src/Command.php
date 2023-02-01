@@ -69,16 +69,18 @@ abstract class Command
      *
      * @param array<mixed> $args
      * @param array<string,mixed> $assoc_args
+     * @return void
      */
-    abstract protected static function invoke( array $args, array $assoc_args ): void;
+    abstract protected static function invoke( array $args, array $assoc_args );
 
     /**
      * Actual handler of the command
      *
      * @param array<mixed> $args
      * @param array<string,mixed> $assoc_args
+     * @return void
      */
-    public function __invoke( array $args, array $assoc_args ): void
+    public function __invoke( array $args, array $assoc_args )
     {
         if ( ! is_multisite() ) {
             static::invoke( $args, $assoc_args );
@@ -92,8 +94,9 @@ abstract class Command
      *
      * @param array<mixed> $args
      * @param array<string,mixed> $assoc_args
+     * @return void
      */
-    public static function invoke_multisite( array $args, array $assoc_args ): void
+    public static function invoke_multisite( array $args, array $assoc_args )
     {
         $all_sites_flag = Utils::get_flag_value( $assoc_args, 'all-sites' );
 
@@ -115,8 +118,9 @@ abstract class Command
      * Register the command with WP-CLI
      *
      * @param string $command CLI command handled by this class
+     * @return void
      */
-    public static function init( string $command ): void
+    public static function init( string $command )
     {
         if ( ! Utils::is_cli_running() ) {
             return;
@@ -129,8 +133,10 @@ abstract class Command
 
     /**
      * Register WP_CLI command using WP_CLI::add_command()
+     * 
+     * @return void
      */
-    protected static function register( string $command ): void
+    protected static function register( string $command )
     {
         // Register the command
         WP_CLI::add_command(
@@ -182,8 +188,9 @@ abstract class Command
      * @param string[]             $args
      * @param array<string,string> $assoc_args
      * @param array<string,mixed>  $options
+     * @return void
      */
-    public static function before_run_command( array $args, array $assoc_args, array $options ): void
+    public static function before_run_command( array $args, array $assoc_args, array $options )
     {
         WP_CLI::debug("Skipping before_run_command hook", "idearia");
     }
@@ -191,8 +198,10 @@ abstract class Command
     /**
      * Override to inject code just before any command in the
      * class is invoked
+     *
+     * @return void
      */
-    public static function before_invoke(): void
+    public static function before_invoke()
     {
         WP_CLI::debug("Skipping before_invoke hook", "idearia");
     }
@@ -200,8 +209,10 @@ abstract class Command
     /**
      * Override to inject code just after any command in the
      * class is invoked
+     *
+     * @return void
      */
-    public static function after_invoke(): void
+    public static function after_invoke()
     {
         WP_CLI::debug("Skipping after_invoke hook", "idearia");
     }
@@ -236,8 +247,10 @@ abstract class Command
      * Wrapper to avoid running before_invoke twice, due to how
      * WP-CLI works (it runs both for the parent comand and the
      * subcommand)
+     *
+     * @return void
      */
-    public static function _before_invoke(): void
+    public static function _before_invoke()
     {
         if ( static::$count_before_invoke == 0 ) {
             static::before_invoke();
@@ -249,8 +262,10 @@ abstract class Command
      * Wrapper to avoid running after_invoke twice, due to how
      * WP-CLI works (it runs both for the parent comand and the
      * subcommand)
+     *
+     * @return void
      */
-    public static function _after_invoke(): void
+    public static function _after_invoke()
     {
         if ( static::$count_after_invoke == 0 ) {
             static::after_invoke();
