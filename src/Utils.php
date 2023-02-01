@@ -1,6 +1,8 @@
 <?php
 namespace Idearia\WP_CLI;
 
+use WP_CLI;
+
 abstract class Utils
 {
     /**
@@ -23,9 +25,9 @@ abstract class Utils
      * @access public
      * @category Input
      *
-     * @param array  $assoc_args Arguments array.
-     * @param string $flag       Flag to get the value.
-     * @param mixed  $default    Default value for the flag. Default: NULL.
+     * @param array<string,mixed> $assoc_args Arguments array.
+     * @param string $flag Flag to get the value.
+     * @param mixed $default Default value for the flag. Default: NULL.
      * @return mixed
      */
     public static function get_flag_value( array $assoc_args, string $flag, mixed $default = null )
@@ -39,15 +41,24 @@ abstract class Utils
      * The callback must take two array arguments: $args and $assoc_args.
      *
      * @param callable $callback
-     * @param array $args
-     * @param array $assoc_args
+     * @param array<mixed> $args
+     * @param array<string,mixed> $assoc_args
+     * @param array<string,mixed> $site_query Optional. Query arguments for get_sites(). Default: ['deleted' => 0, 'number' => PHP_INT_MAX]
      */
-    public static function run_on_all_sites( callable $callback, array $args, array $assoc_args ) : void
+    public static function run_on_all_sites(
+        callable $callback,
+        array $args,
+        array $assoc_args,
+        array $site_query = ['deleted' => 0, 'number' => PHP_INT_MAX]
+    ) : void
     {
         // Get all active sites.
-        $sites = get_sites( array(
-            'deleted'  => 0,
-        ) );
+        $sites = get_sites( $site_query );
+
+        if ( is_int( $sites ) ) {
+            WP_CLI::error( "Wrong site query. Did you pass 'count' as a query var?" );
+            die(); // Just in case.
+        }
 
         // Loop through all sites.
         foreach ( $sites as $site ) {

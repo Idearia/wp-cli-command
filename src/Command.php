@@ -39,7 +39,18 @@ abstract class Command
     protected static bool $allow_all_sites_flag = false;
 
     /**
+     * The site query for those commands that allow the --all-sites flag
+     *
+     * @see https://developer.wordpress.org/reference/functions/get_sites/
+     * 
+     * @var array<string,mixed>
+     */
+    protected static array $site_query = ['deleted' => 0, 'number' => PHP_INT_MAX];
+
+    /**
      * Synopsis of the command
+     *
+     * @var array<int,array<string|mixed>>
      */
     protected static array $synopsis = [];
 
@@ -55,10 +66,19 @@ abstract class Command
 
     /**
      * All subclasses must have an invoke method that handles the command
+     *
+     * @param array<mixed> $args
+     * @param array<string,mixed> $assoc_args
      */
-    abstract protected static function invoke( array $args, array $assoc_args );
+    abstract protected static function invoke( array $args, array $assoc_args ): void;
 
-    public function __invoke( array $args, array $assoc_args )
+    /**
+     * Actual handler of the command
+     *
+     * @param array<mixed> $args
+     * @param array<string,mixed> $assoc_args
+     */
+    public function __invoke( array $args, array $assoc_args ): void
     {
         if ( ! is_multisite() ) {
             static::invoke( $args, $assoc_args );
@@ -69,8 +89,11 @@ abstract class Command
 
     /**
      * Handle the command for multisite installations
+     *
+     * @param array<mixed> $args
+     * @param array<string,mixed> $assoc_args
      */
-    public static function invoke_multisite( array $args, array $assoc_args )
+    public static function invoke_multisite( array $args, array $assoc_args ): void
     {
         $all_sites_flag = Utils::get_flag_value( $assoc_args, 'all-sites' );
 
@@ -81,7 +104,7 @@ abstract class Command
 
         // If the --all-sites flag is set then run the handler on all sites.
         if ( $all_sites_flag ) {
-            Utils::run_on_all_sites( [ static::class, 'invoke' ], $args, $assoc_args );
+            Utils::run_on_all_sites( [ static::class, 'invoke' ], $args, $assoc_args, static::$site_query );
         } else {
             // Run the handler on the current site.
             static::invoke( $args, $assoc_args );
@@ -238,7 +261,7 @@ abstract class Command
     /**
      * Get the command synopsis
      *
-     * @return array[]
+     * @return array<int,array<string|mixed>>
      */
     public static function get_synopsis(): array
     {   
