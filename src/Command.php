@@ -50,7 +50,7 @@ abstract class Command
     /**
      * Synopsis of the command
      *
-     * @var array<int,array<string|mixed>>
+     * @var array<array<string,mixed>>
      */
     protected static array $synopsis = [];
 
@@ -276,7 +276,7 @@ abstract class Command
     /**
      * Get the command synopsis
      *
-     * @return array<int,array<string|mixed>>
+     * @return array<array<string,mixed>>
      */
     public static function get_synopsis(): array
     {   
