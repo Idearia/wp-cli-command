@@ -107,7 +107,7 @@ abstract class Command
 
         // If the --all-sites flag is set then run the handler on all sites.
         if ( $all_sites_flag ) {
-            Utils::run_on_all_sites( [ static::class, 'invoke' ], $args, $assoc_args, static::$site_query );
+            Utils::run_on_all_sites( static::invoke(...), $args, $assoc_args, static::$site_query );
         } else {
             // Run the handler on the current site.
             static::invoke( $args, $assoc_args );
